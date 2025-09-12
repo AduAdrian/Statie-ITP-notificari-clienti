@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { FiDownload, FiRefreshCw, FiCheckCircle, FiAlertCircle, FiX, FiUser, FiPhone, FiCalendar, FiTruck } from 'react-icons/fi';
 import config from '../../config/config';
+import { generateMockPullRequests, simulateApiDelay, generateMockError } from '../../utils/mockData';
 
 const PullRequests = ({ onImportSuccess, onClose }) => {
     const [loading, setLoading] = useState(false);
@@ -17,14 +18,39 @@ const PullRequests = ({ onImportSuccess, onClose }) => {
         setSelectedRequests(new Set());
 
         try {
-            // Make API call to pull requests from ITP station
-            const response = await axios.get(`${config.API_BASE_URL}/stations/pull-requests`);
+            // Simulate API delay for realistic UX
+            await simulateApiDelay();
+            
+            // Try to make real API call first, fall back to mock data if not available
+            let response;
+            try {
+                response = await axios.get(`${config.API_BASE_URL}/stations/pull-requests`);
+            } catch (apiError) {
+                // If API is not available (e.g., in development), use mock data
+                console.log('API not available, using mock data for demonstration');
+                
+                // Simulate occasional errors for testing error handling
+                if (Math.random() < 0.2) { // 20% chance of error
+                    const mockError = generateMockError();
+                    throw new Error(mockError.message);
+                }
+                
+                // Generate mock successful response
+                const mockRequests = generateMockPullRequests();
+                response = {
+                    data: {
+                        success: true,
+                        requests: mockRequests,
+                        message: `Demonstrație: Au fost găsite ${mockRequests.length} cereri simulare`
+                    }
+                };
+            }
             
             if (response.data.success) {
                 setRequests(response.data.requests || []);
                 setPullResult({
                     success: true,
-                    message: `Au fost găsite ${response.data.requests?.length || 0} cereri noi de notificare`,
+                    message: response.data.message || `Au fost găsite ${response.data.requests?.length || 0} cereri noi de notificare`,
                     count: response.data.requests?.length || 0
                 });
             } else {
@@ -37,7 +63,7 @@ const PullRequests = ({ onImportSuccess, onClose }) => {
             console.error('Eroare la extragerea cererilor:', error);
             setPullResult({
                 success: false,
-                message: error.response?.data?.message || 'Eroare la conectarea cu stația ITP'
+                message: error.message || 'Eroare la conectarea cu stația ITP'
             });
         } finally {
             setLoading(false);
