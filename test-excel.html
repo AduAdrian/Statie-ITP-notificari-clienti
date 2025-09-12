@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Excel Download</title>
+</head>
+<body>
+    <h1>Test Excel Template Download</h1>
+    <button onclick="downloadExcel()">Download Excel Template</button>
+    <button onclick="downloadCSV()">Download CSV Template</button>
+    
+    <script>
+        function downloadExcel() {
+            window.open('http://localhost:5000/api/import/template/excel', '_blank');
+        }
+        
+        function downloadCSV() {
+            window.open('http://localhost:5000/api/import/template/csv', '_blank');
+        }
+    </script>
+</body>
+</html>

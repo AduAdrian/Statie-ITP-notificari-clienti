@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Registration with Email Confirmation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+        button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .email-preview {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .email-preview h3 {
+            margin-top: 0;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h1>🧪 Test Înregistrare cu Email de Confirmare</h1>
+            <p>Testează funcționalitatea de trimitere email la înregistrarea unui cont nou</p>
+        </div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">Nume complet:</label>
+                <input type="text" id="name" value="Adrian Avram" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" value="aduadu321@gmail.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Telefon:</label>
+                <input type="tel" id="phone" value="0755596565">
+            </div>
+
+            <div class="form-group">
+                <label for="databaseName">Nume bază de date:</label>
+                <input type="text" id="databaseName" value="Notificari_ITP_Test" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Parolă:</label>
+                <input type="password" id="password" value="testpass123" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password2">Confirmă parola:</label>
+                <input type="password" id="password2" value="testpass123" required>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                📧 Creează Cont și Trimite Email de Confirmare
+            </button>
+        </form>
+
+        <div id="result"></div>
+
+        <div class="email-preview">
+            <h3>📧 Preview Email de Confirmare</h3>
+            <p><strong>Subiect:</strong> 🎉 Bun venit la NotificARI - Contul a fost creat cu succes!</p>
+            <p><strong>Conținut:</strong></p>
+            <ul>
+                <li>✅ Mesaj de bun venit personalizat</li>
+                <li>📋 Detaliile contului (nume, email, bază de date)</li>
+                <li>🚀 Pașii următori pentru utilizare</li>
+                <li>🔐 Buton pentru accesarea aplicației</li>
+                <li>📧 Design profesional cu branding NotificARI</li>
+                <li>📱 Template responsive pentru mobile</li>
+            </ul>
+            <div class="info">
+                <strong>📤 Email-ul va fi trimis la:</strong> <span id="emailPreview">aduadu321@gmail.com</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api/users';
+        
+        document.getElementById('email').addEventListener('input', function() {
+            document.getElementById('emailPreview').textContent = this.value;
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const result = document.getElementById('result');
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Se creează contul și se trimite email-ul...';
+            
+            // Get form data
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                databaseName: document.getElementById('databaseName').value,
+                password: document.getElementById('password').value,
+                password2: document.getElementById('password2').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    result.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Înregistrare reușită!</h3>
+                            <p><strong>Utilizator:</strong> ${data.user?.name || formData.name}</p>
+                            <p><strong>Email:</strong> ${data.user?.email || formData.email}</p>
+                            <p><strong>Baza de date:</strong> ${data.user?.databaseName || formData.databaseName}</p>
+                            <hr>
+                            <p>📧 <strong>Email de confirmare trimis!</strong></p>
+                            <p>Verificați inbox-ul la adresa <strong>${formData.email}</strong></p>
+                            <p>Dacă nu vedeți email-ul, verificați și folderul SPAM.</p>
+                        </div>
+                    `;
+                    
+                    // Reset form
+                    document.getElementById('registerForm').reset();
+                    
+                } else {
+                    result.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Eroare la înregistrare</h3>
+                            <p>${data.email || data.error || 'Eroare necunoscută'}</p>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Eroare de conexiune</h3>
+                        <p>Nu s-a putut conecta la server: ${error.message}</p>
+                        <p>Verificați că serverul rulează pe portul 5000.</p>
+                    </div>
+                `;
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📧 Creează Cont și Trimite Email de Confirmare';
+            }
+        });
+    </script>
+</body>
+</html>

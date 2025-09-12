@@ -1,3 +1,4 @@
+require('dotenv').config(); // Încarcă variabilele de mediu
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -6,6 +7,7 @@ const passport = require('passport');
 
 const users = require('./routes/api/users');
 const notifications = require('./routes/api/notifications');
+const importRoutes = require('./routes/api/import');
 const { checkExpirations } = require('./services/notificationScheduler');
 
 const app = express();
@@ -36,11 +38,12 @@ require('./config/passport')(passport);
 // Routes
 app.use('/api/users', users);
 app.use('/api/notifications', notifications);
+app.use('/api/import', importRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello from the server!');
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port: ${port}`);
 });

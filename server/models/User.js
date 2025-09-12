@@ -12,9 +12,42 @@ const UserSchema = new Schema({
         required: true,
         unique: true
     },
+    phone: {
+        type: String,
+        required: false
+    },
+    companyName: {
+        type: String,
+        required: false
+    },
     password: {
         type: String,
         required: true
+    },
+    databaseName: {
+        type: String,
+        required: true
+    },
+    subscription: {
+        type: String,
+        enum: ['Standard', 'Premium', 'Premium+'],
+        default: 'Standard'
+    },
+    resetCode: {
+        type: String,
+        required: false
+    },
+    resetCodeExpires: {
+        type: Date,
+        required: false
+    },
+    resetToken: {
+        type: String,
+        required: false
+    },
+    resetTokenExpires: {
+        type: Date,
+        required: false
     },
     date: {
         type: Date,

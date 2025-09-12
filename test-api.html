@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Password Reset API</title>
+</head>
+<body>
+    <h1>Test Password Reset</h1>
+    
+    <h2>Register User</h2>
+    <div>
+        <button onclick="registerUser()">Register aduadu321@gmail.com</button>
+        <div id="registerResult"></div>
+    </div>
+    
+    <h2>Forgot Password</h2>
+    <div>
+        <button onclick="forgotPassword()">Send Reset Email</button>
+        <div id="forgotResult"></div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:5000/api/users';
+        
+        async function registerUser() {
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'Adrian Test',
+                        email: 'aduadu321@gmail.com',
+                        password: 'testpass123',
+                        password2: 'testpass123'
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('registerResult').innerHTML = `
+                    <p>Status: ${response.status}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('registerResult').innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function forgotPassword() {
+            try {
+                const response = await fetch(`${API_BASE}/forgot-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'aduadu321@gmail.com',
+                        method: 'email'
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('forgotResult').innerHTML = `
+                    <p>Status: ${response.status}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('forgotResult').innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

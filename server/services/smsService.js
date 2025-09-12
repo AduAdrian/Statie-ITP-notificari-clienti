@@ -30,4 +30,33 @@ const sendSms = async (phone, plateNumber) => {
     }
 };
 
-module.exports = { sendSms };
+// Función para enviar código de reseteo por SMS
+const sendResetCodeSms = async (phone, resetCode) => {
+    const message = `Codul dvs de resetare parola: ${resetCode}. Acesta expira in 10 minute.`;
+    const data = JSON.stringify({
+        phone: phone,
+        shortTextMessage: message,
+        sendAsShort: true
+    });
+
+    const config = {
+        method: 'post',
+        url: 'https://www.smsadvert.ro/api/sms/',
+        headers: {
+            'Authorization': API_TOKEN,
+            'Content-Type': 'application/json'
+        },
+        data: data
+    };
+
+    try {
+        const response = await axios(config);
+        console.log('Reset code SMS sent successfully:', JSON.stringify(response.data));
+        return response.data;
+    } catch (error) {
+        console.error('Error sending reset code SMS:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+module.exports = { sendSms, sendResetCodeSms };
