@@ -1,0 +1,40 @@
+---
+deployment:
+  tasks:
+    # Define paths for ClausWeb hosting
+    - export DEPLOYPATH=/home/misedain/public_html/
+    - export REPOPATH=/home/misedain/repositories/Statie-ITP-notificari-clienti/
+    
+    # Clean deployment directory
+    - /bin/rm -rf $DEPLOYPATH/server $DEPLOYPATH/static $DEPLOYPATH/manifest.json $DEPLOYPATH/index.html
+    
+    # Copy server files
+    - /bin/cp -R $REPOPATH/server $DEPLOYPATH/
+    
+    # Install server dependencies (only production)
+    - cd $DEPLOYPATH/server && /home/misedain/nodevenv/public_html/18/bin/npm install --production --no-audit --no-fund
+    
+    # Copy production environment configuration
+    - /bin/cp $REPOPATH/server/.env.production $DEPLOYPATH/server/.env
+    
+    # Build React client
+    - cd $REPOPATH/client && /home/misedain/nodevenv/public_html/18/bin/npm install --no-audit --no-fund
+    - cd $REPOPATH/client && /home/misedain/nodevenv/public_html/18/bin/npm run build
+    
+    # Deploy React build files to public_html root
+    - /bin/cp -R $REPOPATH/client/build/* $DEPLOYPATH/
+    
+    # Set correct file permissions
+    - find $DEPLOYPATH -name "*.js" -exec chmod 644 {} \;
+    - find $DEPLOYPATH -name "*.json" -exec chmod 644 {} \;
+    - find $DEPLOYPATH -name "*.html" -exec chmod 644 {} \;
+    - find $DEPLOYPATH -name "*.css" -exec chmod 644 {} \;
+    - find $DEPLOYPATH -type d -exec chmod 755 {} \;
+    
+    # Create startup script for Node.js server
+    - echo "cd /home/misedain/public_html/server && /home/misedain/nodevenv/public_html/18/bin/node index.js" > $DEPLOYPATH/start_server.sh
+    - chmod +x $DEPLOYPATH/start_server.sh
+    
+    # Log deployment
+    - echo "[$(date)] NotificARI deployment completed - Server: $DEPLOYPATH/server, Client: $DEPLOYPATH/" >> $DEPLOYPATH/deployment.log
+    - echo "[$(date)] Files deployed: $(find $DEPLOYPATH -type f | wc -l) files" >> $DEPLOYPATH/deployment.log
