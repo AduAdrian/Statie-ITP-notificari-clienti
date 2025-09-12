@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Reset Parolă - misedainspectsrl.ro</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: -30px -30px 30px -30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            margin-bottom: 30px;
+        }
+        .preview-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .preview-section h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .url-preview {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: monospace;
+            word-break: break-all;
+            color: #1976d2;
+            font-weight: 600;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h1>🔐 Test Reset Parolă</h1>
+            <p>Testare configurație pentru <strong>misedainspectsrl.ro</strong></p>
+        </div>
+
+        <div class="info">
+            <h3>📋 Configurație Activă:</h3>
+            <ul>
+                <li><strong>FRONTEND_URL:</strong> https://misedainspectsrl.ro</li>
+                <li><strong>EMAIL:</strong> notificari-sms@misedainspectsrl.ro</li>
+                <li><strong>SMTP:</strong> mail.misedainspectsrl.ro:587</li>
+            </ul>
+        </div>
+
+        <form id="resetForm">
+            <div class="form-group">
+                <label for="email">Email pentru reset parolă:</label>
+                <input type="email" id="email" value="aduadu321@gmail.com" required>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                📧 Trimite Link Reset Parolă
+            </button>
+        </form>
+
+        <div id="result"></div>
+
+        <div class="preview-section">
+            <h3>🔗 Preview Link Reset Parolă</h3>
+            <p>Link-ul care va fi trimis prin email:</p>
+            <div class="url-preview">
+                https://misedainspectsrl.ro/reset-password?token=[GENERATED_TOKEN]
+            </div>
+            
+            <div class="highlight">
+                <strong>⚠️ Important!</strong><br>
+                Link-ul va redirecționa către domeniul de producție <strong>misedainspectsrl.ro</strong> în loc de localhost.
+                Asigură-te că aplicația React este deployată pe acest domeniu.
+            </div>
+            
+            <h4>📧 Ce se va întâmpla:</h4>
+            <ol>
+                <li>Se generează un token de reset securizat</li>
+                <li>Se trimite email cu link către <strong>https://misedainspectsrl.ro</strong></li>
+                <li>Utilizatorul accesează link-ul pe domeniul de producție</li>
+                <li>Se validează token-ul și se permite resetarea parolei</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api/users';
+        
+        document.getElementById('resetForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const result = document.getElementById('result');
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Se trimite email-ul...';
+            
+            const email = document.getElementById('email').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/forgot-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        method: 'email'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    result.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Email trimis cu succes!</h3>
+                            <p><strong>Destinatar:</strong> ${email}</p>
+                            <p><strong>Mesaj:</strong> ${data.message}</p>
+                            <hr>
+                            <p><strong>🔗 Link-ul va redirecționa către:</strong></p>
+                            <div class="url-preview">https://misedainspectsrl.ro/reset-password?token=...</div>
+                            <p><strong>Verificați inbox-ul la adresa specificată!</strong></p>
+                            ${data.debug ? `<p><small><strong>Debug:</strong> ${data.debug}</small></p>` : ''}
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Eroare</h3>
+                            <p>${data.message || data.error || 'Eroare necunoscută'}</p>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Eroare de conexiune</h3>
+                        <p>Nu s-a putut conecta la server: ${error.message}</p>
+                        <p>Verificați că serverul rulează pe portul 5000.</p>
+                    </div>
+                `;
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📧 Trimite Link Reset Parolă';
+            }
+        });
+    </script>
+</body>
+</html>
