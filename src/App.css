@@ -811,7 +811,92 @@ tbody tr:hover {
   }
 }
 
-/* Database Selection Styles */
+/* Database Selection Enhanced Styles */
+.database-type-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.type-label {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.offline-badge {
+    background-color: var(--success-color);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.database-features {
+    margin: 1rem 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-color);
+}
+
+.feature-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    flex-shrink: 0;
+}
+
+.database-status.offline {
+    color: var(--text-color-light);
+}
+
+.database-status.offline .status-dot {
+    background-color: var(--text-color-light);
+    animation: none;
+}
+
+/* Dashboard Database Badge Enhancement */
+.database-badge .db-type {
+    color: var(--secondary-color);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.database-badge .offline-indicator {
+    background-color: var(--success-color);
+    color: white;
+    padding: 0.1rem 0.4rem;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Enhanced Database Cards */
+.database-card[data-requires-server="false"] {
+    border-left-color: var(--success-color) !important;
+}
+
+.database-card[data-requires-server="false"]:hover {
+    box-shadow: 0 20px 40px rgba(40, 167, 69, 0.2);
+}
+
+.database-card[data-requires-server="true"]:hover {
+    box-shadow: 0 20px 40px rgba(0, 123, 255, 0.2);
+}
 .database-selection-container {
   min-height: 100vh;
   padding: 2rem;

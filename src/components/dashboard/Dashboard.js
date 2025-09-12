@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { FiPlus, FiEdit, FiLogOut, FiSearch, FiChevronDown, FiChevronUp, FiUpload, FiTrash2, FiDatabase, FiSettings } from 'react-icons/fi';
+import { buildApiUrl } from '../../config/config';
 import ImportData from './ImportData';
 
-function Dashboard() {
-    const [user, setUser] = useState(null);
+function Dashboard({ database, user: propUser, onLogout }) {
+    const [user, setUser] = useState(propUser);
     const navigate = useNavigate();
     
     // Form state
@@ -29,35 +30,44 @@ function Dashboard() {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
 
+    const fetchNotifications = useCallback(() => {
+        // Folosește configurația database pentru a determina endpoint-ul
+        const apiUrl = database ? buildApiUrl(database.id, '/notifications') : 'http://localhost:5000/api/notifications';
+        
+        axios.get(apiUrl)
+            .then(res => setNotifications(res.data))
+            .catch(err => {
+                console.log('Eroare la încărcarea notificărilor:', err);
+                if (database && !database.requiresServer) {
+                    // Pentru bazele de date offline, încearcă să încarci datele locale
+                    console.log('Încărcare date locale pentru database offline...');
+                }
+            });
+    }, [database]);
+
     // Fetch all notifications on component mount
     useEffect(() => {
         // Verifică dacă utilizatorul este autentificat
         const token = localStorage.getItem('jwtToken');
-        if (!token) {
+        if (!token && !propUser) {
             navigate('/');
             return;
         }
 
-        try {
-            const decoded = jwtDecode(token);
-            setUser(decoded);
-        } catch (error) {
-            console.error('Token invalid:', error);
-            localStorage.removeItem('jwtToken');
-            navigate('/');
-            return;
+        if (!propUser) {
+            try {
+                const decoded = jwtDecode(token);
+                setUser(decoded);
+            } catch (error) {
+                console.error('Token invalid:', error);
+                localStorage.removeItem('jwtToken');
+                navigate('/');
+                return;
+            }
         }
 
         fetchNotifications();
-    }, [navigate]);
-
-    const fetchNotifications = () => {
-        axios.get('http://localhost:5000/api/notifications')
-            .then(res => setNotifications(res.data))
-            .catch(err => {
-                console.log('Eroare la încărcarea notificărilor:', err);
-            });
-    };
+    }, [navigate, database, propUser, fetchNotifications]);
 
     // Filter and sort notifications
     const sortedAndFilteredNotifications = notifications
@@ -126,10 +136,12 @@ function Dashboard() {
         }
 
         const notificationData = { plateNumber, phoneNumber, validity, expirationDate: calculatedExpirationDate };
+        const apiUrl = database ? buildApiUrl(database.id, '/notifications') : 'http://localhost:5000/api/notifications';
 
         if (isEditing) {
             // Update existing notification
-            axios.put(`http://localhost:5000/api/notifications/${currentNotifId}`, notificationData)
+            const updateUrl = database ? buildApiUrl(database.id, `/notifications/${currentNotifId}`) : `http://localhost:5000/api/notifications/${currentNotifId}`;
+            axios.put(updateUrl, notificationData)
                 .then(res => {
                     console.log('Notificare actualizată cu succes');
                     fetchNotifications();
@@ -140,7 +152,7 @@ function Dashboard() {
                 });
         } else {
             // Add new notification
-            axios.post('http://localhost:5000/api/notifications', notificationData)
+            axios.post(apiUrl, notificationData)
                 .then(res => {
                     console.log('Notificare adăugată cu succes');
                     fetchNotifications();
@@ -165,7 +177,8 @@ function Dashboard() {
 
     const handleDelete = (id) => {
         if (window.confirm('Ești sigur că vrei să ștergi această notificare?')) {
-            axios.delete(`http://localhost:5000/api/notifications/${id}`)
+            const deleteUrl = database ? buildApiUrl(database.id, `/notifications/${id}`) : `http://localhost:5000/api/notifications/${id}`;
+            axios.delete(deleteUrl)
                 .then(res => {
                     console.log('Notificare ștearsă cu succes');
                     
@@ -190,7 +203,14 @@ function Dashboard() {
         e.preventDefault();
         localStorage.removeItem('jwtToken');
         localStorage.removeItem('rememberedEmail');
-        navigate('/');
+        localStorage.removeItem('selectedDatabase');
+        localStorage.removeItem('currentUser');
+        
+        if (onLogout) {
+            onLogout();
+        } else {
+            navigate('/');
+        }
     };
 
     return (
@@ -198,13 +218,17 @@ function Dashboard() {
             <header className="dashboard-header">
                 <div className="dashboard-title">
                     <h2>Panou de Control</h2>
-                    {user && (
+                    {(user || propUser) && database && (
                         <div className="database-badge">
                             <div className="database-dot">
                                 <FiDatabase />
                             </div>
-                            <span>{user.databaseName}</span>
-                            <span className="user-info">• {user.name}</span>
+                            <span>{database.name}</span>
+                            <span className="db-type">({database.type})</span>
+                            <span className="user-info">• {(user || propUser).name}</span>
+                            {!database.requiresServer && (
+                                <span className="offline-indicator">Offline Ready</span>
+                            )}
                         </div>
                     )}
                 </div>
