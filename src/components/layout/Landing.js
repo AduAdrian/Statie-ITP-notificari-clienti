@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+
+import { FiMail, FiLock } from 'react-icons/fi';
 
 function Landing() {
     const [email, setEmail] = useState('aduadu321@gmail.com');
@@ -48,67 +50,54 @@ function Landing() {
     };
 
     return (
-        <div style={{ height: '75vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }} className="container">
-            <div className="row">
-                <div className="col s12 center-align">
-                    <h2>
-                        <b>Miseda Inspect SRL</b>
-                    </h2>
-                </div>
-            </div>
-            <div className="row">
-                <div className="col s12 m6 offset-m3 center-align">
-                    <form noValidate onSubmit={onSubmit}>
-                        <div className="input-field col s12">
-                            <input
-                                onChange={e => setEmail(e.target.value)}
-                                value={email}
-                                error={errors.email}
-                                id="email"
-                                type="email"
-                                className="center-align"
-                            />
-                            <label htmlFor="email">Email</label>
-                            <span className="red-text">
-                                {errors.email}
-                                {errors.emailnotfound}
+        <div className="auth-container">
+            <div className="auth-card">
+                <h1>Miseda Inspect SRL</h1>
+                <p>Autentificare în panoul de control</p>
+                <form noValidate onSubmit={onSubmit}>
+                    <div className="input-group">
+                        <FiMail className="icon" />
+                        <input
+                            placeholder="Email"
+                            onChange={e => setEmail(e.target.value)}
+                            value={email}
+                            error={errors.email}
+                            id="email"
+                            type="email"
+                            className="form-control"
+                        />
+                         {(errors.email || errors.emailnotfound) && (
+                            <span className="error-text">
+                                {errors.email || errors.emailnotfound}
                             </span>
-                        </div>
-                        <div className="input-field col s12">
-                            <input
-                                onChange={e => setPassword(e.target.value)}
-                                value={password}
-                                error={errors.password}
-                                id="password"
-                                type="password"
-                                className="center-align"
-                            />
-                            <label htmlFor="password">Password</label>
-                            <span className="red-text">
-                                {errors.password}
-                                {errors.passwordincorrect}
-                            </span>
-                        </div>
-                        <div className="col s12" style={{ paddingLeft: '11.250px', marginTop: '1rem' }}>
-                            <button
-                                style={{
-                                    width: '150px',
-                                    borderRadius: '3px',
-                                    letterSpacing: '1.5px',
-                                }}
-                                type="submit"
-                                className="btn btn-large waves-effect waves-light hoverable blue accent-3"
-                            >
-                                Log In
-                            </button>
-                        </div>
-                    </form>
-                    <div className="col s12" style={{marginTop: '2rem'}}>
-                         <p className="grey-text text-darken-1">
-                            Nu aveți cont? <Link to="/register">Creați cont de administrator</Link>
-                        </p>
+                        )}
                     </div>
-                </div>
+                    <div className="input-group">
+                        <FiLock className="icon" />
+                        <input
+                            placeholder="Parolă"
+                            onChange={e => setPassword(e.target.value)}
+                            value={password}
+                            error={errors.password}
+                            id="password"
+                            type="password"
+                            className="form-control"
+                        />
+                        {(errors.password || errors.passwordincorrect) && (
+                            <span className="error-text">
+                                {errors.password || errors.passwordincorrect}
+                            </span>
+                        )}
+                    </div>
+                    <div style={{ marginTop: '2rem' }}>
+                        <button
+                            type="submit"
+                            className="btn-primary"
+                        >
+                            Login
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

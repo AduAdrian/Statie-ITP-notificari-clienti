@@ -3,11 +3,13 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 
-import Navbar from './components/layout/Navbar';
 import Landing from './components/layout/Landing';
 import Register from './components/auth/Register';
-// import Login from './components/auth/Login'; // No longer needed
+import Login from './components/auth/Login';
+import ForgotPassword from './components/auth/ForgotPassword';
+import ResetPassword from './components/auth/ResetPassword';
 import Dashboard from './components/dashboard/Dashboard';
+import AccountSettings from './components/dashboard/AccountSettings';
 
 import './App.css';
 
@@ -42,12 +44,14 @@ function App() {
     return (
         <Router>
             <div className="App">
-                <Navbar />
                 <Routes>
-                    <Route path="/" element={<Landing />} />
+                    <Route path="/" element={<Login />} />
                     <Route path="/register" element={<Register />} />
-                    {/* <Route path="/login" element={<Login />} /> */}
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/landing" element={<Landing />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/settings" element={<AccountSettings />} />
                 </Routes>
             </div>
         </Router>
