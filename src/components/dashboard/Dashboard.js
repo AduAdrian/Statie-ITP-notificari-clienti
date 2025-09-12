@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import { FiPlus, FiEdit, FiLogOut, FiSearch, FiChevronDown, FiChevronUp, FiUpload, FiTrash2, FiDatabase, FiSettings } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiLogOut, FiSearch, FiChevronDown, FiChevronUp, FiUpload, FiTrash2, FiDatabase, FiSettings, FiDownload } from 'react-icons/fi';
 import ImportData from './ImportData';
+import PullRequests from './PullRequests';
+import config from '../../config/config';
 
 function Dashboard() {
     const [user, setUser] = useState(null);
@@ -24,6 +26,7 @@ function Dashboard() {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: 'expirationDate', direction: 'ascending' });
     const [showImportModal, setShowImportModal] = useState(false);
+    const [showPullRequestsModal, setShowPullRequestsModal] = useState(false);
     
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -52,7 +55,7 @@ function Dashboard() {
     }, [navigate]);
 
     const fetchNotifications = () => {
-        axios.get('http://localhost:5000/api/notifications')
+        axios.get(`${config.API_BASE_URL}/notifications`)
             .then(res => setNotifications(res.data))
             .catch(err => {
                 console.log('Eroare la încărcarea notificărilor:', err);
@@ -129,7 +132,7 @@ function Dashboard() {
 
         if (isEditing) {
             // Update existing notification
-            axios.put(`http://localhost:5000/api/notifications/${currentNotifId}`, notificationData)
+            axios.put(`${config.API_BASE_URL}/notifications/${currentNotifId}`, notificationData)
                 .then(res => {
                     console.log('Notificare actualizată cu succes');
                     fetchNotifications();
@@ -140,7 +143,7 @@ function Dashboard() {
                 });
         } else {
             // Add new notification
-            axios.post('http://localhost:5000/api/notifications', notificationData)
+            axios.post(`${config.API_BASE_URL}/notifications`, notificationData)
                 .then(res => {
                     console.log('Notificare adăugată cu succes');
                     fetchNotifications();
@@ -165,7 +168,7 @@ function Dashboard() {
 
     const handleDelete = (id) => {
         if (window.confirm('Ești sigur că vrei să ștergi această notificare?')) {
-            axios.delete(`http://localhost:5000/api/notifications/${id}`)
+            axios.delete(`${config.API_BASE_URL}/notifications/${id}`)
                 .then(res => {
                     console.log('Notificare ștearsă cu succes');
                     
@@ -218,6 +221,14 @@ function Dashboard() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
+                    <button 
+                        onClick={() => setShowPullRequestsModal(true)} 
+                        className="btn-primary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                        <FiDownload />
+                        <span>Extrage Cereri ITP</span>
+                    </button>
                     <button 
                         onClick={() => setShowImportModal(true)} 
                         className="btn-outline"
@@ -443,6 +454,17 @@ function Dashboard() {
                         setShowImportModal(false);
                     }}
                     onClose={() => setShowImportModal(false)}
+                />
+            )}
+
+            {/* Pull Requests Modal */}
+            {showPullRequestsModal && (
+                <PullRequests 
+                    onImportSuccess={() => {
+                        fetchNotifications();
+                        setShowPullRequestsModal(false);
+                    }}
+                    onClose={() => setShowPullRequestsModal(false)}
                 />
             )}
         </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { FiUpload, FiDownload, FiFileText, FiAlertCircle, FiCheckCircle, FiX } from 'react-icons/fi';
+import config from '../../config/config';
 
 const ImportData = ({ onImportSuccess, onClose }) => {
     const [file, setFile] = useState(null);
@@ -49,7 +50,7 @@ const ImportData = ({ onImportSuccess, onClose }) => {
 
     const downloadTemplate = async (format) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/import/template/${format}`, {
+            const response = await axios.get(`${config.API_BASE_URL}/import/template/${format}`, {
                 responseType: 'blob'
             });
             
@@ -81,7 +82,7 @@ const ImportData = ({ onImportSuccess, onClose }) => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('http://localhost:5000/api/import/upload', formData, {
+            const response = await axios.post(`${config.API_BASE_URL}/import/upload`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
