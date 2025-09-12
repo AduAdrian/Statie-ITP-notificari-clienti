@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiDatabase, FiUsers, FiServer, FiLock } from 'react-icons/fi';
+import { FiDatabase, FiUsers, FiHardDrive, FiFile } from 'react-icons/fi';
 import Login from '../auth/Login';
 import Dashboard from './Dashboard';
 
@@ -8,31 +8,43 @@ function DatabaseSelection() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
 
-    // Lista bazelor de date disponibile
+    // Lista bazelor de date disponibile cu tipurile lor
     const databases = [
         {
             id: 'statie_itp_main',
             name: 'Stația ITP Principală',
-            description: 'Baza de date principală pentru notificări ITP',
+            description: 'Baza de date MongoDB pentru notificări ITP (necesită server)',
             icon: <FiDatabase />,
             color: '#007bff',
-            users: 145
+            users: 145,
+            type: 'MongoDB',
+            status: 'online',
+            requiresServer: true,
+            features: ['Performanță ridicată', 'Scalabilitate', 'Backup automat']
         },
         {
             id: 'statie_itp_secondary',
             name: 'Stația ITP Secundară', 
-            description: 'Baza de date secundară pentru backup și teste',
-            icon: <FiServer />,
+            description: 'Baza de date SQLite locală (funcționează offline)',
+            icon: <FiHardDrive />,
             color: '#28a745',
-            users: 78
+            users: 78,
+            type: 'SQLite',
+            status: 'offline',
+            requiresServer: false,
+            features: ['Funcționare offline', 'Fără server necesar', 'Portabilitate']
         },
         {
             id: 'statie_itp_archive',
             name: 'Arhiva ITP',
-            description: 'Arhiva cu înregistrările istorice',
-            icon: <FiLock />,
+            description: 'Stocare în fișiere JSON (simplu, fără dependencies)',
+            icon: <FiFile />,
             color: '#6c757d',
-            users: 23
+            users: 23,
+            type: 'JSON Files',
+            status: 'offline',
+            requiresServer: false,
+            features: ['Foarte simplu', 'Fără dependencies', 'Ușor de backup']
         }
     ];
 
@@ -99,6 +111,7 @@ function DatabaseSelection() {
                         className="database-card"
                         onClick={() => handleDatabaseSelect(database)}
                         style={{ borderLeftColor: database.color }}
+                        data-requires-server={database.requiresServer}
                     >
                         <div className="database-header">
                             <div 
@@ -110,7 +123,22 @@ function DatabaseSelection() {
                             <div className="database-info">
                                 <h3>{database.name}</h3>
                                 <p>{database.description}</p>
+                                <div className="database-type-badge">
+                                    <span className="type-label">{database.type}</span>
+                                    {!database.requiresServer && (
+                                        <span className="offline-badge">Offline Ready</span>
+                                    )}
+                                </div>
                             </div>
+                        </div>
+                        
+                        <div className="database-features">
+                            {database.features.map((feature, index) => (
+                                <div key={index} className="feature-item">
+                                    <span className="feature-dot"></span>
+                                    <span>{feature}</span>
+                                </div>
+                            ))}
                         </div>
                         
                         <div className="database-stats">
@@ -118,9 +146,9 @@ function DatabaseSelection() {
                                 <FiUsers />
                                 <span>{database.users} utilizatori</span>
                             </div>
-                            <div className="database-status online">
+                            <div className={`database-status ${database.status}`}>
                                 <span className="status-dot"></span>
-                                Online
+                                {database.status === 'online' ? 'Server necesar' : 'Funcționare locală'}
                             </div>
                         </div>
                         
@@ -134,7 +162,8 @@ function DatabaseSelection() {
             </div>
 
             <div className="database-footer">
-                <p>💡 Fiecare bază de date are propriul sistem de autentificare și date separate.</p>
+                <p>💡 Bazele de date offline (SQLite și JSON) nu necesită server MongoDB să fie pornit.</p>
+                <p>🔒 Fiecare bază de date are propriul sistem de autentificare și date separate.</p>
             </div>
         </div>
     );

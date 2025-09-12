@@ -8,6 +8,7 @@ import Register from './components/auth/Register';
 import Login from './components/auth/Login';
 import ForgotPassword from './components/auth/ForgotPassword';
 import ResetPassword from './components/auth/ResetPassword';
+import DatabaseSelection from './components/dashboard/DatabaseSelection';
 import Dashboard from './components/dashboard/Dashboard';
 import AccountSettings from './components/dashboard/AccountSettings';
 
@@ -45,7 +46,8 @@ function App() {
         <Router>
             <div className="App">
                 <Routes>
-                    <Route path="/" element={<Login />} />
+                    <Route path="/" element={<DatabaseSelection />} />
+                    <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
