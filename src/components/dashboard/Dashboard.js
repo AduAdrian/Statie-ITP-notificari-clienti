@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 import { FiPlus, FiEdit, FiLogOut, FiSearch, FiChevronDown, FiChevronUp, FiUpload, FiTrash2, FiDatabase, FiSettings } from 'react-icons/fi';
 import ImportData from './ImportData';
+import currentConfig from '../../config/config';
+import useAuthRedirect from '../../hooks/useAuthRedirect';
 
 function Dashboard() {
-    const [user, setUser] = useState(null);
+    const user = useAuthRedirect(); // Use the hook for authentication
     const navigate = useNavigate();
     
     // Form state
@@ -31,31 +32,16 @@ function Dashboard() {
 
     // Fetch all notifications on component mount
     useEffect(() => {
-        // Verifică dacă utilizatorul este autentificat
-        const token = localStorage.getItem('jwtToken');
-        if (!token) {
-            navigate('/');
-            return;
-        }
-
-        try {
-            const decoded = jwtDecode(token);
-            setUser(decoded);
-        } catch (error) {
-            console.error('Token invalid:', error);
-            localStorage.removeItem('jwtToken');
-            navigate('/');
-            return;
-        }
-
+        // User authentication is handled by useAuthRedirect hook
         fetchNotifications();
-    }, [navigate]);
+    }, []);
 
     const fetchNotifications = () => {
-        axios.get('http://localhost:5000/api/notifications')
+        axios.get(`${currentConfig.API_BASE_URL}/notifications`)
             .then(res => setNotifications(res.data))
             .catch(err => {
-                console.log('Eroare la încărcarea notificărilor:', err);
+                const errorMsg = err.response?.data?.message || 'Eroare la încărcarea notificărilor';
+                console.error('Fetch notifications error:', errorMsg, err);
             });
     };
 
@@ -129,25 +115,27 @@ function Dashboard() {
 
         if (isEditing) {
             // Update existing notification
-            axios.put(`http://localhost:5000/api/notifications/${currentNotifId}`, notificationData)
+            axios.put(`${currentConfig.API_BASE_URL}/notifications/${currentNotifId}`, notificationData)
                 .then(res => {
                     console.log('Notificare actualizată cu succes');
                     fetchNotifications();
                     resetForm();
                 })
                 .catch(err => {
-                    console.log('Eroare la actualizare:', err.response?.data);
+                    const errorMsg = err.response?.data?.message || 'Eroare la actualizare';
+                    console.error('Update error:', errorMsg, err);
                 });
         } else {
             // Add new notification
-            axios.post('http://localhost:5000/api/notifications', notificationData)
+            axios.post(`${currentConfig.API_BASE_URL}/notifications`, notificationData)
                 .then(res => {
                     console.log('Notificare adăugată cu succes');
                     fetchNotifications();
                     resetForm();
                 })
                 .catch(err => {
-                    console.log('Eroare la adăugare:', err.response?.data);
+                    const errorMsg = err.response?.data?.message || 'Eroare la adăugare';
+                    console.error('Add error:', errorMsg, err);
                 });
         }
     };
@@ -165,7 +153,7 @@ function Dashboard() {
 
     const handleDelete = (id) => {
         if (window.confirm('Ești sigur că vrei să ștergi această notificare?')) {
-            axios.delete(`http://localhost:5000/api/notifications/${id}`)
+            axios.delete(`${currentConfig.API_BASE_URL}/notifications/${id}`)
                 .then(res => {
                     console.log('Notificare ștearsă cu succes');
                     
@@ -181,7 +169,8 @@ function Dashboard() {
                     fetchNotifications();
                 })
                 .catch(err => {
-                    console.log('Eroare la ștergere:', err.response?.data);
+                    const errorMsg = err.response?.data?.message || 'Eroare la ștergere';
+                    console.error('Delete error:', errorMsg, err);
                 });
         }
     };

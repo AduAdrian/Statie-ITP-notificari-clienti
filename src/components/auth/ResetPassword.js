@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FiEye, FiEyeOff, FiLock, FiCheck, FiAlertCircle, FiArrowLeft } from 'react-icons/fi';
+import currentConfig from '../../config/config';
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
@@ -42,7 +43,7 @@ const ResetPassword = () => {
         }
 
         try {
-            const response = await axios.post('/api/users/reset-password', {
+            const response = await axios.post(`${currentConfig.API_BASE_URL}/users/reset-password`, {
                 token,
                 newPassword,
                 method: 'email'
@@ -55,10 +56,12 @@ const ResetPassword = () => {
                 }, 3000);
             }
         } catch (err) {
+            const errorData = err.response?.data || { error: 'Eroare de rețea' };
             setError(
-                err.response?.data?.error || 
+                errorData.error || 
                 'A apărut o eroare. Token-ul poate fi invalid sau expirat.'
             );
+            console.error('Reset password error:', err);
         } finally {
             setLoading(false);
         }

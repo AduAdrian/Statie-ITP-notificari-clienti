@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import axios from 'axios';
+import setAuthToken from './utils/auth';
 
 import Landing from './components/layout/Landing';
 import Register from './components/auth/Register';
@@ -12,16 +12,6 @@ import Dashboard from './components/dashboard/Dashboard';
 import AccountSettings from './components/dashboard/AccountSettings';
 
 import './App.css';
-
-const setAuthToken = token => {
-    if (token) {
-        // Apply authorization token to every request if logged in
-        axios.defaults.headers.common['Authorization'] = token;
-    } else {
-        // Delete auth header
-        delete axios.defaults.headers.common['Authorization'];
-    }
-};
 
 // Check for token to keep user logged in
 if (localStorage.jwtToken) {
@@ -35,6 +25,7 @@ if (localStorage.jwtToken) {
     if (decoded.exp < currentTime) {
         // Logout user
         localStorage.removeItem('jwtToken');
+        setAuthToken(null);
         // Redirect to login
         window.location.href = './login';
     }

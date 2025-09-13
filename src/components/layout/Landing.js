@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import currentConfig from '../../config/config';
+import setAuthToken from '../../utils/auth';
 
 import { FiMail, FiLock } from 'react-icons/fi';
 
 function Landing() {
-    const [email, setEmail] = useState('aduadu321@gmail.com');
-    const [password, setPassword] = useState('Miseda!');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [errors, setErrors] = useState({});
     const navigate = useNavigate();
 
@@ -18,14 +20,6 @@ function Landing() {
         }
     }, [navigate]);
 
-    const setAuthToken = token => {
-        if (token) {
-            axios.defaults.headers.common['Authorization'] = token;
-        } else {
-            delete axios.defaults.headers.common['Authorization'];
-        }
-    };
-
     const onSubmit = e => {
         e.preventDefault();
         const userData = {
@@ -33,7 +27,7 @@ function Landing() {
             password: password
         };
         axios
-            .post('http://localhost:5000/api/users/login', userData)
+            .post(`${currentConfig.API_BASE_URL}/users/login`, userData)
             .then(res => {
                 const { token } = res.data;
                 localStorage.setItem('jwtToken', token);
@@ -43,9 +37,9 @@ function Landing() {
                 navigate('/dashboard');
             })
             .catch(err => {
-                if (err.response && err.response.data) {
-                    setErrors(err.response.data);
-                }
+                const errorData = err.response?.data || { general: 'Eroare de rețea' };
+                setErrors(errorData);
+                console.error('Login error:', err);
             });
     };
 

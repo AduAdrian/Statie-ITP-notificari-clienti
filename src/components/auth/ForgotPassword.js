@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiMail, FiPhone, FiSend } from 'react-icons/fi';
 import axios from 'axios';
+import currentConfig from '../../config/config';
 
 function ForgotPassword() {
     const [step, setStep] = useState(1); // 1: choose method, 2: enter details, 3: enter code, 4: new password
@@ -32,7 +33,7 @@ function ForgotPassword() {
                 ? { email, method: 'email' }
                 : { phone, method: 'sms' };
 
-            const response = await axios.post('http://localhost:5000/api/users/forgot-password', payload);
+            const response = await axios.post(`${currentConfig.API_BASE_URL}/users/forgot-password`, payload);
             
             if (response.data.success) {
                 setMessage(response.data.message);
@@ -49,7 +50,9 @@ function ForgotPassword() {
                 }
             }
         } catch (error) {
-            setErrors(error.response?.data || { general: 'Eroare la trimiterea codului' });
+            const errorData = error.response?.data || { general: 'Eroare de rețea' };
+            setErrors(errorData);
+            console.error('Forgot password error:', error);
         } finally {
             setLoading(false);
         }
@@ -67,10 +70,12 @@ function ForgotPassword() {
                 ...(method === 'email' ? { email } : { phone })
             };
 
-            await axios.post('http://localhost:5000/api/users/verify-reset-code', payload);
+            await axios.post(`${currentConfig.API_BASE_URL}/users/verify-reset-code`, payload);
             setStep(4);
         } catch (error) {
-            setErrors(error.response?.data || { code: 'Cod invalid sau expirat' });
+            const errorData = error.response?.data || { code: 'Cod invalid sau expirat' };
+            setErrors(errorData);
+            console.error('Verify code error:', error);
         } finally {
             setLoading(false);
         }
@@ -100,11 +105,13 @@ function ForgotPassword() {
                 ...(method === 'email' ? { email } : { phone })
             };
 
-            await axios.post('http://localhost:5000/api/users/reset-password', payload);
+            await axios.post(`${currentConfig.API_BASE_URL}/users/reset-password`, payload);
             setMessage('Parola a fost resetată cu succes!');
             setTimeout(() => navigate('/'), 2000);
         } catch (error) {
-            setErrors(error.response?.data || { general: 'Eroare la resetarea parolei' });
+            const errorData = error.response?.data || { general: 'Eroare de rețea' };
+            setErrors(errorData);
+            console.error('Reset password error:', error);
         } finally {
             setLoading(false);
         }
