@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiUser, FiMail, FiLock, FiDatabase, FiPhone, FiArrowLeft } from 'react-icons/fi';
 import axios from 'axios';
+import currentConfig from '../../config/config';
 
 function Register() {
     const [name, setName] = useState('');
@@ -31,11 +32,13 @@ function Register() {
             databaseName: databaseName.trim()
         };
         axios
-            .post('http://localhost:5000/api/users/register', newUser)
+            .post(`${currentConfig.API_BASE_URL}/users/register`, newUser)
             .then(res => navigate('/login')) // re-direct to login on successful register
-            .catch(err =>
-                setErrors(err.response.data)
-            );
+            .catch(err => {
+                const errorData = err.response?.data || { general: 'Eroare de rețea' };
+                setErrors(errorData);
+                console.error('Registration error:', err);
+            });
     };
 
     return (

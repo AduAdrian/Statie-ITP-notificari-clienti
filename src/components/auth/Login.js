@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { FiArrowLeft, FiMail, FiLock } from 'react-icons/fi';
+import currentConfig from '../../config/config';
+import setAuthToken from '../../utils/auth';
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -19,16 +21,6 @@ function Login() {
         }
     }, []);
 
-    const setAuthToken = token => {
-        if (token) {
-            // Apply authorization token to every request if logged in
-            axios.defaults.headers.common['Authorization'] = token;
-        } else {
-            // Delete auth header
-            delete axios.defaults.headers.common['Authorization'];
-        }
-    };
-
     const onSubmit = e => {
         e.preventDefault();
         const userData = {
@@ -37,7 +29,7 @@ function Login() {
         };
         
         axios
-            .post('http://localhost:5000/api/users/login', userData)
+            .post(`${currentConfig.API_BASE_URL}/users/login`, userData)
             .then(res => {
                 // Save to localStorage
                 const { token } = res.data;
@@ -56,9 +48,11 @@ function Login() {
                 console.log(decoded);
                 navigate('/dashboard');
             })
-            .catch(err =>
-                setErrors(err.response.data)
-            );
+            .catch(err => {
+                const errorData = err.response?.data || { general: 'Eroare de rețea' };
+                setErrors(errorData);
+                console.error('Login error:', err);
+            });
     };
 
     return (

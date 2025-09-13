@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 import { FiUser, FiBriefcase, FiPhone, FiMail, FiCreditCard, FiSave, FiArrowLeft, FiCheck, FiStar } from 'react-icons/fi';
 import axios from 'axios';
+import currentConfig from '../../config/config';
+import useAuthRedirect from '../../hooks/useAuthRedirect';
 
 function AccountSettings() {
-    const [user, setUser] = useState(null);
+    const user = useAuthRedirect(); // Use the hook for authentication
     const [formData, setFormData] = useState({
         name: '',
         companyName: '',
@@ -64,29 +65,15 @@ function AccountSettings() {
     ];
 
     useEffect(() => {
-        // Verifică dacă utilizatorul este autentificat
-        const token = localStorage.getItem('jwtToken');
-        if (!token) {
-            navigate('/');
-            return;
+        // User authentication is handled by useAuthRedirect hook
+        if (user) {
+            fetchUserData(user.id);
         }
-
-        try {
-            const decoded = jwtDecode(token);
-            setUser(decoded);
-            
-            // Încarcă datele utilizatorului
-            fetchUserData(decoded.id);
-        } catch (error) {
-            console.error('Token invalid:', error);
-            localStorage.removeItem('jwtToken');
-            navigate('/');
-        }
-    }, [navigate]);
+    }, [user]);
 
     const fetchUserData = async (userId) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/users/profile/${userId}`);
+            const response = await axios.get(`${currentConfig.API_BASE_URL}/users/profile/${userId}`);
             const userData = response.data;
             
             setFormData({
@@ -97,7 +84,8 @@ function AccountSettings() {
                 subscription: userData.subscription || 'Standard'
             });
         } catch (error) {
-            console.error('Eroare la încărcarea datelor:', error);
+            const errorMsg = error.response?.data?.message || 'Eroare la încărcarea datelor';
+            console.error('Fetch user data error:', errorMsg, error);
         }
     };
 
@@ -123,14 +111,12 @@ function AccountSettings() {
         setMessage('');
 
         try {
-            await axios.put(`http://localhost:5000/api/users/profile/${user.id}`, formData);
+            await axios.put(`${currentConfig.API_BASE_URL}/users/profile/${user.id}`, formData);
             setMessage('Setările au fost salvate cu succes!');
         } catch (error) {
-            if (error.response?.data) {
-                setErrors(error.response.data);
-            } else {
-                setErrors({ general: 'Eroare la salvarea datelor' });
-            }
+            const errorData = error.response?.data || { general: 'Eroare de rețea' };
+            setErrors(errorData);
+            console.error('Save settings error:', error);
         } finally {
             setLoading(false);
         }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { FiUpload, FiDownload, FiFileText, FiAlertCircle, FiCheckCircle, FiX } from 'react-icons/fi';
+import currentConfig from '../../config/config';
 
 const ImportData = ({ onImportSuccess, onClose }) => {
     const [file, setFile] = useState(null);
@@ -49,7 +50,7 @@ const ImportData = ({ onImportSuccess, onClose }) => {
 
     const downloadTemplate = async (format) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/import/template/${format}`, {
+            const response = await axios.get(`${currentConfig.API_BASE_URL}/import/template/${format}`, {
                 responseType: 'blob'
             });
             
@@ -63,8 +64,9 @@ const ImportData = ({ onImportSuccess, onClose }) => {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
         } catch (error) {
-            console.error('Error downloading template:', error);
-            alert('Eroare la descărcarea template-ului');
+            const errorMsg = error.response?.data?.message || 'Eroare la descărcarea template-ului';
+            console.error('Template download error:', errorMsg, error);
+            alert(errorMsg);
         }
     };
 
@@ -81,7 +83,7 @@ const ImportData = ({ onImportSuccess, onClose }) => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('http://localhost:5000/api/import/upload', formData, {
+            const response = await axios.post(`${currentConfig.API_BASE_URL}/import/upload`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -93,10 +95,11 @@ const ImportData = ({ onImportSuccess, onClose }) => {
                 onImportSuccess();
             }
         } catch (error) {
+            const errorData = error.response?.data || { error: 'Eroare de rețea' };
             console.error('Upload error:', error);
             setUploadResult({
                 success: false,
-                error: error.response?.data?.error || 'Eroare la încărcarea fișierului'
+                error: errorData.error || 'Eroare la încărcarea fișierului'
             });
         } finally {
             setUploading(false);
